@@ -1,0 +1,61 @@
+from rest_framework.viewsets import ViewSet
+from rest_framework.response import Response
+from django.core.paginator import Paginator
+
+from transparence.models import Party, LegalCase, Source
+
+
+class LegalCaseViewSet(ViewSet):
+
+    def list(self, request):
+        page_number = int(request.GET.get("page", 1))
+        page_size = int(request.GET.get("pageSize", 10))
+        party_id = request.GET.get("party_id")
+        if party_id:
+            query = LegalCase.objects.filter(party__id=party_id)
+        else:
+            query = LegalCase.objects.all()
+        legal_cases = query.order_by("-date")
+        paginator = Paginator(legal_cases, page_size)
+        page = paginator.get_page(page_number)
+
+        data = list(map(map_legal_cases, page.object_list))
+        pagination = {
+            "page": page.number,
+            "page_size": paginator.per_page,
+            "pages_count": paginator.num_pages,
+            "total": paginator.count,
+        }
+
+        return Response({"data": data, "pagination": pagination})
+
+
+def map_legal_cases(case):
+    return {
+        "category": case.category,
+        "title": case.title,
+        "status": case.status,
+        "date": case.date,
+        "verdict_date": case.verdict_date,
+        "party": {
+            "id": case.party.id,
+            "name": case.party.name,
+        },
+        "politician": {
+            "id": case.politician.id,
+            "first_name": case.politician.first_name,
+            "last_name": case.politician.last_name,
+        },
+        "sources": list(map(map_sources, case.sources.all())),
+    }
+
+
+def map_sources(source):
+    return {
+        "url": source.url,
+        "publisher": source.publisher,
+        "type": source.type,
+        "title": source.title,
+        "description": source.description,
+        "published_at": source.published_at,
+    }
