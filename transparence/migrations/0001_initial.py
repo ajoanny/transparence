@@ -8,55 +8,107 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Party',
+            name="Party",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('abbreviation', models.CharField(max_length=100, unique=True)),
-                ('name', models.CharField(max_length=100, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("abbreviation", models.CharField(max_length=100, unique=True)),
+                ("name", models.CharField(max_length=100, unique=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Politician',
+            name="Politician",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('external_id', models.CharField(max_length=100)),
-                ('first_name', models.CharField(max_length=100)),
-                ('last_name', models.CharField(max_length=100)),
-                ('civility', models.CharField(max_length=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("external_id", models.CharField(max_length=100)),
+                ("first_name", models.CharField(max_length=100)),
+                ("last_name", models.CharField(max_length=100)),
+                ("civility", models.CharField(max_length=100)),
             ],
         ),
         migrations.CreateModel(
-            name='LegalCase',
+            name="LegalCase",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('external_id', models.CharField(max_length=100)),
-                ('category', models.CharField(max_length=100)),
-                ('title', models.TextField()),
-                ('description', models.TextField()),
-                ('date', models.DateField()),
-                ('status', models.CharField(max_length=100)),
-                ('verdict_date', models.DateField()),
-                ('party', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='legal_cases', to='transparence.party')),
-                ('politician', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='legal_cases', to='transparence.politician')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("external_id", models.CharField(max_length=100)),
+                ("category", models.CharField(max_length=100)),
+                ("title", models.TextField()),
+                ("description", models.TextField()),
+                ("date", models.DateField()),
+                ("status", models.CharField(max_length=100)),
+                ("verdict_date", models.DateField()),
+                (
+                    "party",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="legal_cases",
+                        to="transparence.party",
+                    ),
+                ),
+                (
+                    "politician",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="legal_cases",
+                        to="transparence.politician",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Source',
+            name="Source",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('external_id', models.CharField(max_length=100)),
-                ('url', models.URLField(blank=True, max_length=1000, null=True)),
-                ('publisher', models.CharField(max_length=100)),
-                ('type', models.CharField(max_length=100)),
-                ('title', models.TextField()),
-                ('description', models.TextField()),
-                ('published_at', models.DateField()),
-                ('legal_case', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sources', to='transparence.legalcase')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("external_id", models.CharField(max_length=100)),
+                ("url", models.URLField(blank=True, max_length=1000, null=True)),
+                ("publisher", models.CharField(max_length=100)),
+                ("type", models.CharField(max_length=100)),
+                ("title", models.TextField()),
+                ("description", models.TextField()),
+                ("published_at", models.DateField()),
+                (
+                    "legal_case",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sources",
+                        to="transparence.legalcase",
+                    ),
+                ),
             ],
         ),
     ]

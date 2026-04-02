@@ -2,7 +2,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from django.core.paginator import Paginator
 
-from transparence.models import Party, LegalCase, Source
+from transparence.models import LegalCase
 
 
 class LegalCaseViewSet(ViewSet):

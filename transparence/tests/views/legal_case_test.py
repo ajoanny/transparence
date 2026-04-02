@@ -100,7 +100,7 @@ class ApiLegalCaseTest(TestCase):
             party=party,
             politician=politician,
         )
-        source_1 = Source.objects.create(
+        Source.objects.create(
             external_id="SOURCE-001",
             url="http://localhost:8000",
             publisher="1",
@@ -110,7 +110,7 @@ class ApiLegalCaseTest(TestCase):
             published_at=date(2025, 1, 1),
             legal_case=case,
         )
-        source_2 = Source.objects.create(
+        Source.objects.create(
             external_id="SOURCE-002",
             url="http://localhost:8001",
             publisher="2",
@@ -147,7 +147,7 @@ class ApiLegalCaseTest(TestCase):
             ]
         )
 
-    def test_list_when_there_is_no_pagination_given_it_and_when_there_is_less_than_10_legal_cases_it_returns_all_legal_cases(
+    def test_list_when_no_pagination_and_less_than_10_cases_it_returns_all_cases(
         self,
     ):
         case_1 = LegalCaseFactory(title="Case 1", date=date(2025, 1, 2))
@@ -165,9 +165,9 @@ class ApiLegalCaseTest(TestCase):
         self,
     ):
         case_1 = LegalCaseFactory(title="Case 1", date=date(2025, 1, 1))
-        case_2 = LegalCaseFactory(title="Case 2", date=date(2025, 3, 1))
+        LegalCaseFactory(title="Case 2", date=date(2025, 3, 1))
         case_3 = LegalCaseFactory(title="Case 3", date=date(2025, 1, 2))
-        case_4 = LegalCaseFactory(title="Case 4", date=date(2025, 4, 1))
+        LegalCaseFactory(title="Case 4", date=date(2025, 4, 1))
 
         response = self.client.get("/api/legal-cases/?pageSize=2&page=2")
 

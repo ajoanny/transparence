@@ -1,9 +1,5 @@
 from django.test import TestCase
-from transparence.models import Party
-from transparence.tests.factories.legal_case import LegalCaseFactory
 from transparence.tests.factories.party import PartyFactory
-from transparence.tests.factories.politician import PoliticianFactory
-from transparence.views import party
 
 
 class ApiPartyTest(TestCase):
@@ -26,7 +22,7 @@ class ApiPartyTest(TestCase):
             },
         )
 
-    def test_list_when_there_is_no_pagination_parameter_and_there_less_than_10_parties_given_it_returns_all_existing_parties(
+    def test_list_when_no_pagination_and_less_than_10_parties_returns_all(
         self,
     ):
         party_1 = PartyFactory(name="Liberty Alliance", abbreviation="LA")
@@ -61,7 +57,7 @@ class ApiPartyTest(TestCase):
             },
         )
 
-    def test_list_when_there_is_a_page_number_given_it_returns_all_parties_for_the_given_page(
+    def test_list_when_page_number_returns_all_parties_for_given_page(
         self,
     ):
         for i in range(1, 12):
@@ -119,7 +115,7 @@ class ApiPartyTest(TestCase):
         self,
     ):
 
-        response = self.client.get(f"/api/parties/1/")
+        response = self.client.get("/api/parties/1/")
 
         self.assertEqual(response.status_code, 404)
 

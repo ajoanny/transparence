@@ -7,29 +7,52 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('transparence', '0002_alter_legalcase_category_alter_legalcase_external_id'),
+        ("transparence", "0002_alter_legalcase_category_alter_legalcase_external_id"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ApiClient',
+            name="ApiClient",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('client_id', models.CharField(max_length=100, unique=True)),
-                ('client_secret', models.CharField(max_length=100)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('jti', models.CharField(blank=True, max_length=100, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("client_id", models.CharField(max_length=100, unique=True)),
+                ("client_secret", models.CharField(max_length=100)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("jti", models.CharField(blank=True, max_length=100, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='RefreshToken',
+            name="RefreshToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(max_length=100)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('expired_at', models.DateTimeField()),
-                ('client', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='refresh_token', to='transparence.apiclient')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("token", models.CharField(max_length=100)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("expired_at", models.DateTimeField()),
+                (
+                    "client",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="refresh_token",
+                        to="transparence.apiclient",
+                    ),
+                ),
             ],
         ),
     ]

@@ -14,7 +14,5 @@ class Source(models.Model):
     published_at = models.DateField()
 
     legal_case = models.ForeignKey(
-        LegalCase,
-        on_delete=models.CASCADE,
-        related_name="sources"
+        LegalCase, on_delete=models.CASCADE, related_name="sources"
     )

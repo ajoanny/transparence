@@ -17,7 +17,6 @@ class ApiClient(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     jti = models.CharField(max_length=100, null=True, blank=True)
 
-
     def init(self):
         self.client_id = secrets.token_urlsafe(16)
         self.secret = secrets.token_urlsafe(24)
@@ -31,11 +30,13 @@ class ApiClient(models.Model):
 
     def token(self):
         now = datetime.now(timezone.utc)
-        expired_at=now + timedelta(hours=1)
+        expired_at = now + timedelta(hours=1)
 
         refresh_token = secrets.token_urlsafe(64)
         RefreshToken.objects.filter(client=self).delete()
-        RefreshToken.objects.create(client=self, token=refresh_token, expired_at=expired_at )
+        RefreshToken.objects.create(
+            client=self, token=refresh_token, expired_at=expired_at
+        )
         self.jwt_revoked = False
         self.jti = str(uuid.uuid4())
         self.save()
@@ -47,12 +48,11 @@ class ApiClient(models.Model):
             "iat": now,
             "jti": self.jti,
         }
-        access_token = jwt.encode(data, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+        access_token = jwt.encode(
+            data, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM
+        )
 
-        return {
-            "access_token": access_token,
-            "refresh_token": refresh_token
-        }
+        return {"access_token": access_token, "refresh_token": refresh_token}
 
     def revoke(self):
         self.jti = None
@@ -66,7 +66,7 @@ class ApiClient(models.Model):
         return self.token()
 
     def __str__(self):
-      return self.name
+        return self.name
 
     def check_secret(self, secret):
         return check_password(secret, self.client_secret)

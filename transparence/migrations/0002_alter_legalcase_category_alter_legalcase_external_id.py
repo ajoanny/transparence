@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('transparence', '0001_initial'),
+        ("transparence", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='legalcase',
-            name='category',
+            model_name="legalcase",
+            name="category",
             field=models.CharField(db_index=True, max_length=100),
         ),
         migrations.AlterField(
-            model_name='legalcase',
-            name='external_id',
+            model_name="legalcase",
+            name="external_id",
             field=models.CharField(db_index=True, max_length=100),
         ),
     ]

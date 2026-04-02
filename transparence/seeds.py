@@ -1,4 +1,4 @@
-from transparence.models import Party, Politician, LegalCase, politician, Source
+from transparence.models import Party, Politician, LegalCase, Source
 from transparence.tests.factories.legal_case import LegalCaseFactory
 from transparence.tests.factories.source import SourceFactory
 
