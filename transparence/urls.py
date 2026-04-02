@@ -1,6 +1,12 @@
-from django.urls import path
-from transparence.views.party import list as party_list
+from django.urls import path, include
 
-urlpatterns = [
-    path('parties/', party_list, name='party-list'),
-]
+from transparence.views.party import PartyViewSet
+from transparence.views.auth import AuthViewSet
+
+from rest_framework.routers import DefaultRouter
+router = DefaultRouter()
+
+router.register('', AuthViewSet, basename='token')
+router.register('parties', PartyViewSet, basename='party')
+
+urlpatterns = [ path('', include(router.urls)),]
