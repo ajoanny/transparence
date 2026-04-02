@@ -1,5 +1,9 @@
 from django.test import TestCase
 from transparence.models import Party
+from transparence.tests.factories.legal_case import LegalCaseFactory
+from transparence.tests.factories.party import PartyFactory
+from transparence.tests.factories.politician import PoliticianFactory
+from transparence.views import party
 
 
 class ApiPartyTest(TestCase):
@@ -25,8 +29,8 @@ class ApiPartyTest(TestCase):
     def test_list_when_there_is_no_pagination_parameter_and_there_less_than_10_parties_given_it_returns_all_existing_parties(
         self,
     ):
-        Party.objects.create(name="Liberty Alliance", abbreviation="LA")
-        Party.objects.create(name="Progressive Front", abbreviation="PF")
+        party_1 = PartyFactory(name="Liberty Alliance", abbreviation="LA")
+        party_2 = PartyFactory(name="Progressive Front", abbreviation="PF")
 
         response = self.client.get("/api/parties/")
 
@@ -37,8 +41,16 @@ class ApiPartyTest(TestCase):
             data,
             {
                 "data": [
-                    {"name": "Liberty Alliance", "abbreviation": "LA"},
-                    {"name": "Progressive Front", "abbreviation": "PF"},
+                    {
+                        "party_id": party_1.id,
+                        "name": "Liberty Alliance",
+                        "abbreviation": "LA",
+                    },
+                    {
+                        "party_id": party_2.id,
+                        "name": "Progressive Front",
+                        "abbreviation": "PF",
+                    },
                 ],
                 "pagination": {
                     "page": 1,
@@ -53,7 +65,7 @@ class ApiPartyTest(TestCase):
         self,
     ):
         for i in range(1, 12):
-            Party.objects.create(name=f"{i}", abbreviation=f"{i}")
+            PartyFactory(id=i, name=f"{i}", abbreviation=f"{i}")
 
         response = self.client.get("/api/parties/?page=2")
 
@@ -64,7 +76,7 @@ class ApiPartyTest(TestCase):
             data,
             {
                 "data": [
-                    {"name": "9", "abbreviation": "9"},
+                    {"party_id": 9, "name": "9", "abbreviation": "9"},
                 ],
                 "pagination": {
                     "page": 2,
@@ -79,7 +91,7 @@ class ApiPartyTest(TestCase):
         self,
     ):
         for i in range(1, 10):
-            Party.objects.create(name=f"{i}", abbreviation=f"{i}")
+            PartyFactory(id=i, name=f"{i}", abbreviation=f"{i}")
 
         response = self.client.get("/api/parties/?pageSize=3")
 
@@ -90,15 +102,45 @@ class ApiPartyTest(TestCase):
             data,
             {
                 "data": [
-                    {"name": "1", "abbreviation": "1"},
-                    {"name": "2", "abbreviation": "2"},
-                    {"name": "3", "abbreviation": "3"},
+                    {"party_id": 1, "" "name": "1", "abbreviation": "1"},
+                    {"party_id": 2, "name": "2", "abbreviation": "2"},
+                    {"party_id": 3, "name": "3", "abbreviation": "3"},
                 ],
                 "pagination": {
                     "page": 1,
                     "page_size": 3,
                     "pages_count": 3,
                     "total": 9,
+                },
+            },
+        )
+
+    def test_detail_when_there_is_no_party_it_returns_404_not_found(
+        self,
+    ):
+
+        response = self.client.get(f"/api/parties/1/")
+
+        self.assertEqual(response.status_code, 404)
+
+        data = response.json()
+        self.assertEqual(data, {"message": "Not found"})
+
+    def test_detail_when_the_party_exists_it_returns_the_party(self):
+        party = PartyFactory(name="Name", abbreviation="ABR")
+
+        response = self.client.get(f"/api/parties/{party.id}/")
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertEqual(
+            data,
+            {
+                "data": {
+                    "name": party.name,
+                    "abbreviation": party.abbreviation,
+                    "party_id": party.id,
                 },
             },
         )
