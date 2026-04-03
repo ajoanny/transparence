@@ -24,8 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
 JWT_SECRET = os.getenv("JWT_SECRET")
+SECRET_KEY = os.getenv("JWT_SECRET")
 JWT_EXP_DELTA_SECONDS = 60 * 15
 JWT_ALGORITHM = "HS256"
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -85,6 +85,8 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", "5432"),
     }
 }
+
+print(DATABASES)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
