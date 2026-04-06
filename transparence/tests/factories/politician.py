@@ -11,6 +11,4 @@ class PoliticianFactory(factory.django.DjangoModelFactory):
         model = Politician
 
     external_id = factory.Faker("uuid4")
-    first_name = factory.Faker("first_name")
-    last_name = factory.Faker("last_name")
-    civility = factory.Faker("prefix")
+    full_name = factory.Faker("name")

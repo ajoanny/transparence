@@ -1,10 +1,11 @@
 from datetime import date
 from django.test import TestCase
-from transparence.models import Party, Politician, LegalCase, Source
+from transparence.models import LegalCase, Source
 from assertpy import assert_that
 
 from transparence.tests.factories.legal_case import LegalCaseFactory
 from transparence.tests.factories.party import PartyFactory
+from transparence.tests.factories.politician import PoliticianFactory
 
 
 class ApiLegalCaseTest(TestCase):
@@ -29,10 +30,8 @@ class ApiLegalCaseTest(TestCase):
     def test_list_when_there_is_one_legal_case_it_returns_data_about_legal_case(
         self,
     ):
-        politician = Politician.objects.create(
-            first_name="John", last_name="Doe", civility="M.", external_id="1"
-        )
-        party = Party.objects.create(name="Liberty Alliance", abbreviation="LA")
+        politician = PoliticianFactory.create(full_name="John Doe", external_id="1")
+        party = PartyFactory.create(name="Liberty Alliance", abbreviation="LA")
 
         case = LegalCase.objects.create(
             external_id="CASE-001",
@@ -57,6 +56,7 @@ class ApiLegalCaseTest(TestCase):
                     {
                         "category": case.category,
                         "title": case.title,
+                        "description": case.description,
                         "status": case.status,
                         "date": str(case.date),
                         "verdict_date": str(case.verdict_date),
@@ -66,8 +66,7 @@ class ApiLegalCaseTest(TestCase):
                         },
                         "politician": {
                             "id": politician.id,
-                            "first_name": politician.first_name,
-                            "last_name": politician.last_name,
+                            "full_name": politician.full_name,
                         },
                         "sources": [],
                     },
@@ -84,10 +83,8 @@ class ApiLegalCaseTest(TestCase):
     def test_list_when_there_is_one_legal_case_it_returns_source_of_legal_case(
         self,
     ):
-        politician = Politician.objects.create(
-            first_name="John", last_name="Doe", civility="M.", external_id="1"
-        )
-        party = Party.objects.create(name="Liberty Alliance", abbreviation="LA")
+        politician = PoliticianFactory.create(full_name="John Doe", external_id="1")
+        party = PartyFactory.create(name="Liberty Alliance", abbreviation="LA")
 
         case = LegalCase.objects.create(
             external_id="CASE-001",
@@ -106,7 +103,6 @@ class ApiLegalCaseTest(TestCase):
             publisher="1",
             type="PRESSE",
             title="Titre 1",
-            description="Description 1",
             published_at=date(2025, 1, 1),
             legal_case=case,
         )
@@ -116,7 +112,6 @@ class ApiLegalCaseTest(TestCase):
             publisher="2",
             type="AUTRE",
             title="Titre 2",
-            description="Description 2",
             published_at=date(2026, 1, 1),
             legal_case=case,
         )
@@ -133,7 +128,6 @@ class ApiLegalCaseTest(TestCase):
                     "publisher": "1",
                     "type": "PRESSE",
                     "title": "Titre 1",
-                    "description": "Description 1",
                     "published_at": str(date(2025, 1, 1)),
                 },
                 {
@@ -141,7 +135,6 @@ class ApiLegalCaseTest(TestCase):
                     "publisher": "2",
                     "type": "AUTRE",
                     "title": "Titre 2",
-                    "description": "Description 2",
                     "published_at": str(date(2026, 1, 1)),
                 },
             ]

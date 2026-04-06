@@ -1,3 +1,5 @@
+from datetime import timezone
+
 import factory
 from faker import Faker
 
@@ -13,6 +15,7 @@ class LegalCaseFactory(factory.django.DjangoModelFactory):
         model = LegalCase
 
     external_id = factory.Faker("uuid4")
+    external_updated_at = factory.Faker("date_time", tzinfo=timezone.utc)
     category = "ABUS_DE_BIENS_SOCIAUX"
     status = "MISE_EN_EXAMEN"
 

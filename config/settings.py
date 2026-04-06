@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 JWT_SECRET = os.getenv("JWT_SECRET")
-SECRET_KEY = os.getenv("JWT_SECRET")
+SECRET_KEY = os.getenv("SECRET_KEY")
 JWT_EXP_DELTA_SECONDS = 60 * 15
 JWT_ALGORITHM = "HS256"
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django.contrib.contenttypes",
     "django.contrib.auth",
+    "django_q",
     "transparence",
 ]
 
@@ -86,8 +87,6 @@ DATABASES = {
     }
 }
 
-print(DATABASES)
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "transparence.auth.jwt_authentication.JWTAuthentication",
@@ -106,8 +105,16 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+POLIGRAPH_API_URL = os.getenv("POLIGRAPH_API_URL")
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+Q_CLUSTER = {
+    "name": "transparence",
+    "workers": 1,
+    "timeout": 60,
+    "retry": 120,
+    "orm": "default",
+}

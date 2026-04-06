@@ -34,6 +34,7 @@ def map_legal_cases(case):
     return {
         "category": case.category,
         "title": case.title,
+        "description": case.description,
         "status": case.status,
         "date": case.date,
         "verdict_date": case.verdict_date,
@@ -43,8 +44,7 @@ def map_legal_cases(case):
         },
         "politician": {
             "id": case.politician.id,
-            "first_name": case.politician.first_name,
-            "last_name": case.politician.last_name,
+            "full_name": case.politician.full_name,
         },
         "sources": list(map(map_sources, case.sources.all())),
     }
@@ -56,6 +56,5 @@ def map_sources(source):
         "publisher": source.publisher,
         "type": source.type,
         "title": source.title,
-        "description": source.description,
         "published_at": source.published_at,
     }
