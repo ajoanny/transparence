@@ -4,12 +4,11 @@ from transparence.models.legal_case import LegalCase
 
 
 class Source(models.Model):
-    external_id = models.CharField(max_length=100)
+    external_id = models.CharField(max_length=100, unique=True)
     url = models.URLField(max_length=1000, null=True, blank=True)
     publisher = models.CharField(max_length=100)
     type = models.CharField(max_length=100)
     title = models.TextField()
-    description = models.TextField()
 
     published_at = models.DateField()
 
