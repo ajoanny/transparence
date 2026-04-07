@@ -1,0 +1,10 @@
+from config.settings import *
+
+MIDDLEWARE = [m for m in MIDDLEWARE if "APIKeyLoggingMiddleware" not in m]
+
+REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = []
+REST_FRAMEWORK["DEFAULT_PERMISSION_CLASSES"] = []
+REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = []
+API_KEY_REQUIRED = False
+print("Using test settings")

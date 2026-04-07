@@ -310,6 +310,37 @@ class PoligraphApiTest(TestCase):
         ]
         assert_that(results["data"]).is_equal_to(expected)
 
+    def test_when_descriptiion_has_links_remove_links(self):
+        response = {
+            "data": [
+                {
+                    "id": "case.id",
+                    "factsDate": None,
+                    "verdictDate": f"{date(2026,1,2)}",
+                    "updatedAt": f"{date(2026,1,3)}",
+                    "category": "case.category",
+                    "title": "case.title",
+                    "description": "bla [sentence](/url/a) et [lien](https://a.com)",
+                    "status": "case.status",
+                    "partyAtTime": None,
+                    "politician": {
+                        "id": "politician.id",
+                        "fullName": "politician.fullName",
+                        "currentParty": None,
+                    },
+                    "sources": [],
+                }
+            ],
+            "pagination": {"page": 1, "limit": 20, "total": 1, "totalPages": 1},
+        }
+        url = f"{settings.POLIGRAPH_API_URL}/api/affaires?page=1"
+        http = HttpDouble(url, response)
+
+        results = fetch_data(1, http)
+        assert_that(results["data"][0]["description"]).is_equal_to(
+            "bla sentence et lien"
+        )
+
     def test_when_several_cases(self):
         response = {
             "data": [

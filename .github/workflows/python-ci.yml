@@ -57,6 +57,7 @@ jobs:
         DB_PASSWORD: password
         DB_HOST: postgres
         DB_PORT: 5432
+        ALLOWED_ORIGINS: "http://localhost:3000"
       services:
         postgres:
           image: postgres:16.13-alpine3.23

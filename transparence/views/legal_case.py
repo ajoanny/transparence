@@ -6,7 +6,6 @@ from transparence.models import LegalCase
 
 
 class LegalCaseViewSet(ViewSet):
-
     def list(self, request):
         page_number = int(request.GET.get("page", 1))
         page_size = int(request.GET.get("pageSize", 10))

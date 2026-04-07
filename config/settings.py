@@ -40,16 +40,25 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "django.contrib.contenttypes",
+    "django.contrib.admin",
+    "django.contrib.messages",
+    "django.contrib.sessions",
     "django.contrib.auth",
     "django_q",
+    "rest_framework_api_key",
+    "corsheaders",
     "transparence",
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "config.middleware.LogRequestMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -88,10 +97,14 @@ DATABASES = {
 }
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "transparence.auth.jwt_authentication.JWTAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": [],
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework_api_key.permissions.HasAPIKey"],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "config.security.APIRateLimiting",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "api_key": "500/minute",
+    },
 }
 
 # Internationalization
@@ -117,4 +130,38 @@ Q_CLUSTER = {
     "timeout": 60,
     "retry": 120,
     "orm": "default",
+}
+
+
+CORS_ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS").split(",")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} {levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "api_usage.log"),  # fichier local
+            "formatter": "verbose",
+        },
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "api_usage": {
+            "handlers": ["file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
 }
