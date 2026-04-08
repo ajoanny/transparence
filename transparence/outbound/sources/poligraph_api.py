@@ -1,3 +1,5 @@
+import re
+
 from dateutil import parser
 from config import settings
 
@@ -29,7 +31,7 @@ def map_case(case):
         "external_updated_at": parser.parse(case["updatedAt"]),
         "category": case["category"],
         "title": case["title"],
-        "description": case["description"],
+        "description": re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", case["description"]),
         "status": case["status"],
         "date": date,
         "verdict_date": verdict_date,

@@ -80,6 +80,15 @@ Or with watch mode:
 ptw
 ```
 
+## API-KEY
+
+To generate an API key, use the /admin interface.
+Before accessing the admin, you must create a superuser.
+
+````bash
+python manage.py createsuperuser
+````
+
 ## Contributing
 
 Contributions are welcome.
