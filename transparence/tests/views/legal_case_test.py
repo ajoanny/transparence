@@ -170,7 +170,7 @@ class ApiLegalCaseTest(TestCase):
         legal_case_names = [case["title"] for case in data["data"]]
         assert_that(legal_case_names).is_equal_to([case_3.title, case_1.title])
 
-    def test_list_when_there_is_a_filter_party_returns_the_matching_page(
+    def test_list_when_filter_party_returns_the_matching_page(
         self,
     ):
         party_1 = PartyFactory(abbreviation="A1")
@@ -186,7 +186,7 @@ class ApiLegalCaseTest(TestCase):
         legal_case_names = [case["title"] for case in data["data"]]
         assert_that(legal_case_names).is_equal_to([case_1.title])
 
-    def test_list_when_there_is_a_filter_politician_returns_the_matching_page(
+    def test_list_when_filter_politician_returns_the_matching_page(
         self,
     ):
         politician_1 = PoliticianFactory(id=1)
@@ -201,6 +201,29 @@ class ApiLegalCaseTest(TestCase):
         data = response.json()
         legal_case_names = [case["title"] for case in data["data"]]
         assert_that(legal_case_names).is_equal_to([case_1.title])
+
+    def test_list_when_filter_status_returns_the_matching_page(
+        self,
+    ):
+        matching_case_1 = LegalCaseFactory(
+            title="Case 1", status="MISE_EN_EXAMEN", date=date(2025, 1, 1)
+        )
+        LegalCaseFactory(title="Case 2", status="APPEL", date=date(2025, 1, 2))
+        matching_case_2 = LegalCaseFactory(
+            title="Case 3", status="RELAXE", date=date(2025, 1, 3)
+        )
+
+        response = self.client.get(
+            "/api/legal-cases/?statuses=MISE_EN_EXAMEN&statuses=RELAXE"
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        legal_case_names = [case["title"] for case in data["data"]]
+        assert_that(legal_case_names).is_equal_to(
+            [matching_case_2.title, matching_case_1.title]
+        )
 
     def test_list_when_search_filter_returns_case_with_matching_description(
         self,
@@ -251,7 +274,7 @@ class ApiLegalCaseTest(TestCase):
     def test_list_when_search_filter_and_returns_the_case_with_matching_politician(
         self,
     ):
-        politician_1 = PoliticianFactory(full_name="John Doe")
+        politician_1 = PoliticianFactory(full_name="John Johnson Doe")
         politician_2 = PoliticianFactory(full_name="Al Coholic")
         matching_case = LegalCaseFactory(
             title="Case 1",
@@ -262,13 +285,31 @@ class ApiLegalCaseTest(TestCase):
             politician=politician_2,
         )
 
-        response = self.client.get('/api/legal-cases/?search="John Doe"')
+        response = self.client.get('/api/legal-cases/?search="John Johnson Doe"')
 
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
         legal_case_names = [case["title"] for case in data["data"]]
         assert_that(legal_case_names).is_equal_to([matching_case.title])
+
+    def test_list_when_search_filter_and_returns_the_case_with_matching_status(
+        self,
+    ):
+        matching_case = LegalCaseFactory(title="Case 1", status="MISE_EN_EXAMEN")
+        LegalCaseFactory(title="Case 2", status="APPEL")
+
+        response = self.client.get("/api/legal-cases/?search=MISE_EN_EXAMEN")
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        legal_case_names = [case["title"] for case in data["data"]]
+        assert_that(legal_case_names).is_equal_to(
+            [
+                matching_case.title,
+            ]
+        )
 
     def test_list_when_there_are_multiple_filters_returns_matching_case(
         self,
