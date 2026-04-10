@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.auth",
     "django_q",
+    "django.contrib.postgres",
     "rest_framework_api_key",
     "corsheaders",
     "transparence",

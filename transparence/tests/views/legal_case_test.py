@@ -9,7 +9,7 @@ from transparence.tests.factories.politician import PoliticianFactory
 
 
 class ApiLegalCaseTest(TestCase):
-    def test_list_when_there_is_no_data_it_returns_no_data(self):
+    def test_list_when_there_is_no_data_returns_no_data(self):
         response = self.client.get("/api/legal-cases/")
 
         self.assertEqual(response.status_code, 200)
@@ -27,7 +27,7 @@ class ApiLegalCaseTest(TestCase):
             },
         )
 
-    def test_list_when_there_is_one_legal_case_it_returns_data_about_legal_case(
+    def test_list_when_there_is_one_legal_case_returns_data_about_legal_case(
         self,
     ):
         politician = PoliticianFactory.create(full_name="John Doe", external_id="1")
@@ -80,7 +80,7 @@ class ApiLegalCaseTest(TestCase):
             }
         )
 
-    def test_list_when_there_is_one_legal_case_it_returns_source_of_legal_case(
+    def test_list_when_there_is_one_legal_case_returns_source_of_legal_case(
         self,
     ):
         politician = PoliticianFactory.create(full_name="John Doe", external_id="1")
@@ -140,7 +140,7 @@ class ApiLegalCaseTest(TestCase):
             ]
         )
 
-    def test_list_when_no_pagination_and_less_than_10_cases_it_returns_all_cases(
+    def test_list_when_no_pagination_and_less_than_10_cases_returns_all_cases(
         self,
     ):
         case_1 = LegalCaseFactory(title="Case 1", date=date(2025, 1, 2))
@@ -154,7 +154,7 @@ class ApiLegalCaseTest(TestCase):
         legal_case_names = [case["title"] for case in data["data"]]
         assert_that(legal_case_names).is_equal_to([case_1.title, case_2.title])
 
-    def test_list_when_there_is_pagination_given_it_returns_the_matching_page(
+    def test_list_when_there_is_pagination_given_returns_the_matching_page(
         self,
     ):
         case_1 = LegalCaseFactory(title="Case 1", date=date(2025, 1, 1))
@@ -170,7 +170,7 @@ class ApiLegalCaseTest(TestCase):
         legal_case_names = [case["title"] for case in data["data"]]
         assert_that(legal_case_names).is_equal_to([case_3.title, case_1.title])
 
-    def test_list_when_there_is_a_filter_party_it_returns_the_matching_page(
+    def test_list_when_there_is_a_filter_party_returns_the_matching_page(
         self,
     ):
         party_1 = PartyFactory(abbreviation="A1")
@@ -185,3 +185,118 @@ class ApiLegalCaseTest(TestCase):
         data = response.json()
         legal_case_names = [case["title"] for case in data["data"]]
         assert_that(legal_case_names).is_equal_to([case_1.title])
+
+    def test_list_when_there_is_a_filter_politician_returns_the_matching_page(
+        self,
+    ):
+        politician_1 = PoliticianFactory(id=1)
+        politician_2 = PoliticianFactory(id=2)
+        case_1 = LegalCaseFactory(title="Case 1", politician=politician_1)
+        LegalCaseFactory(title="Case 2", politician=politician_2)
+
+        response = self.client.get(f"/api/legal-cases/?politician_id={politician_1.id}")
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        legal_case_names = [case["title"] for case in data["data"]]
+        assert_that(legal_case_names).is_equal_to([case_1.title])
+
+    def test_list_when_search_filter_returns_case_with_matching_description(
+        self,
+    ):
+        party_1 = PartyFactory(abbreviation="A1")
+        party_2 = PartyFactory(abbreviation="B1")
+        case_1 = LegalCaseFactory(
+            title="Case 1",
+            party=party_1,
+            description="Case 1 a matching text for my test",
+        )
+        LegalCaseFactory(
+            title="Case 2",
+            party=party_2,
+            description="Case 2 a different description",
+        )
+
+        response = self.client.get(
+            '/api/legal-cases/?search="matching text for my test"'
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        legal_case_names = [case["title"] for case in data["data"]]
+        assert_that(legal_case_names).is_equal_to([case_1.title])
+
+    def test_list_when_search_filter_and_returns_the_case_with_matching_title(
+        self,
+    ):
+        LegalCaseFactory(
+            title="Case 1 un text different",
+        )
+        matching_case = LegalCaseFactory(
+            title="Case 2 une description pour l'affaire",
+        )
+
+        response = self.client.get(
+            "/api/legal-cases/?search=\"une description pour l'affaire"
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        legal_case_names = [case["title"] for case in data["data"]]
+        assert_that(legal_case_names).is_equal_to([matching_case.title])
+
+    def test_list_when_search_filter_and_returns_the_case_with_matching_politician(
+        self,
+    ):
+        politician_1 = PoliticianFactory(full_name="John Doe")
+        politician_2 = PoliticianFactory(full_name="Al Coholic")
+        matching_case = LegalCaseFactory(
+            title="Case 1",
+            politician=politician_1,
+        )
+        LegalCaseFactory(
+            title="Case 2",
+            politician=politician_2,
+        )
+
+        response = self.client.get('/api/legal-cases/?search="John Doe"')
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        legal_case_names = [case["title"] for case in data["data"]]
+        assert_that(legal_case_names).is_equal_to([matching_case.title])
+
+    def test_list_when_there_are_multiple_filters_returns_matching_case(
+        self,
+    ):
+        party_1 = PartyFactory(abbreviation="A1")
+        party_2 = PartyFactory(abbreviation="B1")
+        matching_case = LegalCaseFactory(
+            title="Case 1",
+            party=party_1,
+            description="Case 1 a matching text for my test",
+        )
+        LegalCaseFactory(
+            title="Case 2",
+            party=party_2,
+            description="Case 2 a different description",
+        )
+        LegalCaseFactory(
+            title="Case 3",
+            party=party_1,
+            description="Case 2 a different description",
+        )
+        text = "matching text for my test"
+        response = self.client.get(
+            f'/api/legal-cases/?search="{text}"&party_id={party_1.id}'
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        legal_case_names = [case["title"] for case in data["data"]]
+        assert_that(legal_case_names).is_equal_to([matching_case.title])
