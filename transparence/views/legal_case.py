@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from django.core.paginator import Paginator
 
 from transparence.models import LegalCase
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from django.db.models import Value, QuerySet
 
 
 class LegalCaseViewSet(ViewSet):
@@ -10,12 +12,19 @@ class LegalCaseViewSet(ViewSet):
         page_number = int(request.GET.get("page", 1))
         page_size = int(request.GET.get("pageSize", 10))
         party_id = request.GET.get("party_id")
+        politician_id = request.GET.get("politician_id")
+        search = request.GET.get("search")
+        query = (
+            LegalCase.objects.annotate(rank=Value(1)).order_by("-rank", "-date").all()
+        )
         if party_id:
-            query = LegalCase.objects.filter(party__id=party_id)
-        else:
-            query = LegalCase.objects.all()
-        legal_cases = query.order_by("-date")
-        paginator = Paginator(legal_cases, page_size)
+            query = query.filter(party__id=party_id)
+        if politician_id:
+            query = query.filter(politician_id=politician_id)
+        elif search:
+            query = self.text_filter(query, search)
+
+        paginator = Paginator(query, page_size)
         page = paginator.get_page(page_number)
 
         data = list(map(map_legal_cases, page.object_list))
@@ -27,6 +36,22 @@ class LegalCaseViewSet(ViewSet):
         }
 
         return Response({"data": data, "pagination": pagination})
+
+    def text_filter(
+        self, query: QuerySet[LegalCase, LegalCase], search
+    ) -> QuerySet[LegalCase, LegalCase]:
+        vector = (
+            SearchVector("description", config="french")
+            + SearchVector("title", config="french")
+            + SearchVector("politician__full_name", config="french")
+            + SearchVector("party__name", config="french")
+        )
+        search_query = SearchQuery(search, config="french")
+        search_rank = SearchRank(vector, search_query)
+        query = (
+            query.annotate(rank=search_rank).filter(rank__gte=0.09).order_by("-rank")
+        )
+        return query
 
 
 def map_legal_cases(case):
