@@ -19,17 +19,21 @@ class LegalCaseViewSet(ViewSet):
         page_size = int(request.GET.get("pageSize", 10))
         party_id = request.GET.get("party_id")
         politician_id = request.GET.get("politician_id")
+        statuses = request.GET.getlist("statuses", [])
         search = request.GET.get("search")
         query = (
             LegalCase.objects.annotate(rank=Value(1), similarity=Value(1))
             .order_by("-rank", "-similarity", "-date")
             .all()
         )
+        print(statuses)
         if party_id:
             query = query.filter(party__id=party_id)
         if politician_id:
             query = query.filter(politician_id=politician_id)
-        elif search:
+        if statuses:
+            query = query.filter(status__in=statuses).distinct()
+        if search:
             query = self.text_filter(query, search)
 
         paginator = Paginator(query, page_size)
@@ -63,6 +67,7 @@ class LegalCaseViewSet(ViewSet):
                 TrigramSimilarity("title", search),
                 TrigramSimilarity("party__name", search),
                 TrigramSimilarity("politician__full_name", search),
+                TrigramSimilarity("status", search),
             ),
         ).filter(Q(similarity__gte=0.1) | Q(rank__gte=0.1))
 
