@@ -1,10 +1,16 @@
+from django.db.models.functions import Greatest
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from django.core.paginator import Paginator
 
 from transparence.models import LegalCase
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
-from django.db.models import Value, QuerySet
+from django.contrib.postgres.search import (
+    SearchVector,
+    SearchQuery,
+    SearchRank,
+    TrigramSimilarity,
+)
+from django.db.models import Value, QuerySet, Q
 
 
 class LegalCaseViewSet(ViewSet):
@@ -15,7 +21,9 @@ class LegalCaseViewSet(ViewSet):
         politician_id = request.GET.get("politician_id")
         search = request.GET.get("search")
         query = (
-            LegalCase.objects.annotate(rank=Value(1)).order_by("-rank", "-date").all()
+            LegalCase.objects.annotate(rank=Value(1), similarity=Value(1))
+            .order_by("-rank", "-similarity", "-date")
+            .all()
         )
         if party_id:
             query = query.filter(party__id=party_id)
@@ -41,16 +49,23 @@ class LegalCaseViewSet(ViewSet):
         self, query: QuerySet[LegalCase, LegalCase], search
     ) -> QuerySet[LegalCase, LegalCase]:
         vector = (
-            SearchVector("description", config="french")
-            + SearchVector("title", config="french")
-            + SearchVector("politician__full_name", config="french")
-            + SearchVector("party__name", config="french")
+            SearchVector("party__name", config="french", weight="A")
+            + SearchVector("politician__full_name", config="french", weight="B")
+            + SearchVector("title", config="french", weight="C")
+            + SearchVector("description", config="french", weight="D")
         )
+
         search_query = SearchQuery(search, config="french")
-        search_rank = SearchRank(vector, search_query)
-        query = (
-            query.annotate(rank=search_rank).filter(rank__gte=0.09).order_by("-rank")
-        )
+        search_rank = SearchRank(vector, search_query, weights=[0.1, 1, 1, 1])
+        query = query.annotate(
+            rank=search_rank,
+            similarity=Greatest(
+                TrigramSimilarity("title", search),
+                TrigramSimilarity("party__name", search),
+                TrigramSimilarity("politician__full_name", search),
+            ),
+        ).filter(Q(similarity__gte=0.1) | Q(rank__gte=0.1))
+
         return query
 
 
