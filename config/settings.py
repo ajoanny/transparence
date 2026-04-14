@@ -29,11 +29,9 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 JWT_EXP_DELTA_SECONDS = 60 * 15
 JWT_ALGORITHM = "HS256"
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = []
-
-
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 # Application definition
 
 INSTALLED_APPS = [
@@ -58,6 +56,8 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "config.middleware.LogRequestMiddleware",
 ]
@@ -124,6 +124,7 @@ POLIGRAPH_API_URL = os.getenv("POLIGRAPH_API_URL")
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 Q_CLUSTER = {
     "name": "transparence",
@@ -133,8 +134,7 @@ Q_CLUSTER = {
     "orm": "default",
 }
 
-
-CORS_ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS").split(",")
+CORS_ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
 
 LOGGING = {
     "version": 1,
@@ -164,5 +164,11 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+    },
+}
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
